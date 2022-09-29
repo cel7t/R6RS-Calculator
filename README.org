@@ -2,7 +2,7 @@
 #+Author:Sarthak Shah
 * Description
 An R6RS Scheme Infix Arithmetic Calculator.
-Supports +, -, **, *, ( and ).
+Supports +, -, **, *, %, ( and ).
 It should work with all R6RS Scheme Implementations, and has been tested with Chez and Guile Scheme
 * Usage
 For Chez, append at the top of the file:

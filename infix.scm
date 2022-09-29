@@ -18,7 +18,7 @@
 ;; Boston, MA  02110-1301, USA.
 
 ;; Details:
-;; Supports +, -, **, *, ( and ).
+;; Supports +, -, **, *, %, ( and ).
 ;; Should work with all R6RS Scheme Implementations
 ;; Tested with Chez and Guile Scheme
 ;; For Chez, append at the top of the file:
