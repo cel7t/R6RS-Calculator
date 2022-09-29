@@ -161,8 +161,9 @@
 (define (frac-add intg frac)
   (let ((digits (+ 1 (floor (/ (log frac) (log 10))))))
     (+ intg
-       (/ frac
-          (expt 10 digits)))))
+       (* (if (negative? intg) -1 1)
+          (/ frac
+          (expt 10 digits))))))
 
 (define-syntax infix-op
   (syntax-rules ()
