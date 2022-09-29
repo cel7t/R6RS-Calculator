@@ -186,6 +186,7 @@
 (infix-op infix-^ "Calculates all num ^ num in list." '^ expt)
 (infix-op infix-/ "Calculates all num / num in list." '/ /)
 (infix-op infix-* "Calculates all num * num in list." '* *)
+(infix-op infix-% "Calculates all num % num in list." '% modulo)
 (infix-op infix-+ "Calculates all num + num in list." '+ +)
 
 (define split-at->
@@ -213,9 +214,11 @@
   (let* ((parensed (eval-parens '() lst))
          (negated (negativize '() parensed))
          (consed-args (split-at-> negated))
-         (result (infix-+ (infix-* (infix-/ (infix-^ (reverse (car consed-args))))))))
+         (result (infix-+ (infix-% (infix-* (infix-/ (infix-^ (reverse (car consed-args)))))))))
     (if (null? (cdr consed-args))
         result
         (list (car result) (cadr consed-args)))))
 
-(calculate-infix-string (cadr (command-line)))
+;; combines all args after ./infix.scm
+;; example - ./infix.scm a b ... c -> "ab...c"
+(calculate-infix-string (apply string-append (cdr (command-line))))
