@@ -159,11 +159,13 @@
     (format #t "The Result of the Evaluation is ~S.~%" (car (calculate-infix verified)))))
 
 (define (frac-add intg frac)
+  (if (= frac 0)
+      intg
   (let ((digits (+ 1 (floor (/ (log frac) (log 10))))))
     (+ intg
        (* (if (negative? intg) -1 1)
           (/ frac
-          (expt 10 digits))))))
+          (expt 10 digits)))))))
 
 (define-syntax infix-op
   (syntax-rules ()
