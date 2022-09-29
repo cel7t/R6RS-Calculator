@@ -1,0 +1,21 @@
+#+TITLE:R6RS Infix Calculator
+#+Author:Sarthak Shah
+* Description
+An R6RS Scheme Infix Arithmetic Calculator.
+Supports +, -, **, *, ( and ).
+It should work with all R6RS Scheme Implementations, and has been tested with Chez and Guile Scheme
+* Usage
+For Chez, append at the top of the file:
+#+BEGIN_SRC scheme
+#!/usr/bin/chez --script
+#+END_SRC
+For Guile, append at the top of the file:
+#+BEGIN_SRC scheme
+#!/usr/bin/guile -s
+!#
+#+END_SRC
+For other R6RS compliant scheme implementations, check the 'script' header for your implementation and add it to the top of this file.
+* License
+Copyright © 2022 Sarthak Shah
+This Software is Licensed under GPLv2 or later.
+Check LICENSE for details.
