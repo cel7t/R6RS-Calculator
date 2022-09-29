@@ -83,8 +83,8 @@
 
 (define (number-or-paren? chr)
   (if (or (number? chr)
-          (eq? chr #\<)
-          (eq? chr #\>))
+          (eq? chr '<)
+          (eq? chr '>))
       #t
       #f))
 
@@ -156,7 +156,7 @@
          (minus-minused (minus-minus '() exp-replaced))
          (plus-minused (plus-minus '() minus-minused))
          (verified (verify '() plus-minused)))
-    (display (car (calculate-infix verified)))))
+    (format #t "The Result of the Evaluation is ~S.~%" (car (calculate-infix verified)))))
 
 (define (frac-add intg frac)
   (let ((digits (+ 1 (floor (/ (log frac) (log 10))))))
