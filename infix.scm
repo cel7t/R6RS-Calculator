@@ -19,6 +19,8 @@
 
 ;; Details:
 ;; Supports +, -, **, *, %, ( and ).
+;; Works with floating-point numbers.
+;; As Scheme is infinite-precision, be careful if you set the output as Decimal
 ;; Should work with all R6RS Scheme Implementations
 ;; Tested with Chez and Guile Scheme
 ;; For Chez, append at the top of the file:
@@ -28,6 +30,8 @@
 ;; !#
 ;; For other R6RS compliant scheme implementations,
 ;; check the 'script' function and add it to the top of this file.
+;; Usage:
+;; ./infix.scm "<expression>"
 
 
 (define (parse-num carry lst)
@@ -152,7 +156,13 @@
          (minus-minused (minus-minus '() exp-replaced))
          (plus-minused (plus-minus '() minus-minused))
          (verified (verify '() plus-minused)))
-    (format #t "The Expression Evaluates to ~S.~%" (car (calculate-infix verified)))))
+    (display (car (calculate-infix verified)))))
+
+(define (frac-add intg frac)
+  (let ((digits (+ 1 (floor (/ (log frac) (log 10))))))
+    (+ intg
+       (/ frac
+          (expt 10 digits)))))
 
 (define-syntax infix-op
   (syntax-rules ()
@@ -188,6 +198,7 @@
 (infix-op infix-* "Calculates all num * num in list." '* *)
 (infix-op infix-% "Calculates all num % num in list." '% modulo)
 (infix-op infix-+ "Calculates all num + num in list." '+ +)
+(infix-op infix-dot "Calculates all num . frac in list." (string->symbol ".") frac-add)
 
 (define split-at->
   (case-lambda
@@ -214,11 +225,11 @@
   (let* ((parensed (eval-parens '() lst))
          (negated (negativize '() parensed))
          (consed-args (split-at-> negated))
-         (result (infix-+ (infix-% (infix-* (infix-/ (infix-^ (reverse (car consed-args)))))))))
+         (result (infix-+ (infix-% (infix-* (infix-/ (infix-^ (infix-dot (reverse (car consed-args))))))))))
     (if (null? (cdr consed-args))
         result
         (list (car result) (cadr consed-args)))))
 
-;; combines all args after ./infix.scm
-;; example - ./infix.scm a b ... c -> "ab...c"
-(calculate-infix-string (apply string-append (cdr (command-line))))
+;; ./infix.scm "<expression>"
+(calculate-infix-string (cadr (command-line)))
+
