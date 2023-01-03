@@ -46,13 +46,6 @@
 				 [(a b)
 					body ...])))))
 
-(define& (is-this-ok a b)
-	"is this ok?"
-	(append a b))
-
-(is-this-ok '(a b) '(c d))
-(is-this-ok '(a b))
-
 (define (parse-num carry lst)
   "Parse the characters of the first number of the list."
   (let ((num (string->number (string (car lst)))))
@@ -187,8 +180,6 @@
 	(syntax-rules ()
 		((_ a) a) ; return VALUE if it is just VALUE
 		((_ a (f . body) g ...) (-> (f a . body) g ...)))) ; use VALUE as the argument for the 1st FUNCTION
-
-(-> '(1 2) (append '(3 4) '(5 6)) (append '(7 8)))
 
 (define (infix-calc str)
   "Calculates the value of an infix arithmetic string"
