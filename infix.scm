@@ -33,6 +33,25 @@
 ;; Usage:
 ;; ./infix.scm "<expression>"
 
+;; define with optional args: we want an empty list
+;; define* is non-standard scheme, so here's an implementation
+(define-syntax define&
+	(syntax-rules ()
+		((_ (name a b) body ...)
+		 (define name
+			 (case-lambda
+				 [(b)
+					(let ((a '()))
+						body ...)]
+				 [(a b)
+					body ...])))))
+
+(define& (is-this-ok a b)
+	"is this ok?"
+	(append a b))
+
+(is-this-ok '(a b) '(c d))
+(is-this-ok '(a b))
 
 (define (parse-num carry lst)
   "Parse the characters of the first number of the list."
@@ -44,7 +63,7 @@
         (list (+ (* 10 carry) num)
               (cdr lst)))))
 
-(define (parsify parsed lst)
+(define& (parsify parsed lst)
   "Parse numbers and arithmetic operators in a list."
   (if (null? lst)
       parsed
@@ -72,7 +91,7 @@
          (parsify parsed (cdr lst))) ; just ignore it
         (else "error")))) ; should error
 
-(define (exp-replace repd lst)
+(define& (exp-replace repd lst)
   "Replaces '* '* with '^ for easier exponentiation."
   (if (null? lst)
       repd
@@ -88,7 +107,7 @@
       #t
       #f))
 
-(define (plus-minus pmd lst)
+(define& (plus-minus pmd lst)
   "Converts num - num to num + - num"
   (if (< (length lst) 3)
       (append pmd lst)
@@ -104,7 +123,7 @@
           (plus-minus (append pmd (list (car lst)))
                       (cdr lst)))))
 
-(define (minus-minus mmd lst)
+(define& (minus-minus mmd lst)
   "Converts num - - num to num + num"
   (if (< (length lst) 4)
       (append mmd lst)
@@ -120,7 +139,7 @@
           (minus-minus (append mmd (list (car lst)))
                        (cdr lst)))))
 
-(define (negativize ntd lst)
+(define& (negativize ntd lst)
   "Converts - num to -num"
   (if (< (length lst) 2)
       (append ntd lst)
@@ -131,7 +150,7 @@
           (negativize (append ntd (list (car lst)))
                       (cdr lst)))))
 
-(define (eval-parens carry lst)
+(define& (eval-parens carry lst)
   "Evaluate procedures inside parens first."
   (if (null? lst)
       carry
@@ -143,20 +162,45 @@
                        (cdr lst)))))
 
 
-(define (verify verified lst)
-  "Verify if arithmetically sound, error otherwise"
-  ;; Are braces matching?
-  ;; Are arithmetic operations singular? (i.e. no 1*/2 etc)
-  lst)
+(define (matching? lst num)
+	(let ((paren-error
+				 (lambda () (and (display "Error: Parens unbalanced.\n") (exit)))))
+		(if (null? lst)
+				(if (not (= num 0)) (paren-error))
+				(case (car lst)
+					((<) (matching? (cdr lst) (1+ num))) ; plus
+					((>) (matching? (cdr lst) (1- num))) ; minus
+					(else (matching? (cdr lst) num))))))
 
-(define (calculate-infix-string str)
+
+(define& (verify verified lst)
+	"Verify if arithmetically sound, error otherwise"
+	;; Are braces matching?
+	;; This is necessary for Nestedness to work
+	(matching? lst 0)
+	;; Are arithmetic operations singular? (i.e. no 1*/2 etc)
+	;; Scheme takes care of this
+	lst)
+
+;; Thread-first Macro from Clojure
+(define-syntax ->
+	(syntax-rules ()
+		((_ a) a) ; return VALUE if it is just VALUE
+		((_ a (f . body) g ...) (-> (f a . body) g ...)))) ; use VALUE as the argument for the 1st FUNCTION
+
+(-> '(1 2) (append '(3 4) '(5 6)) (append '(7 8)))
+
+(define (infix-calc str)
   "Calculates the value of an infix arithmetic string"
-  (let* ((parsed (parsify '() (string->list str)))
-         (exp-replaced (exp-replace '() parsed))
-         (minus-minused (minus-minus '() exp-replaced))
-         (plus-minused (plus-minus '() minus-minused))
-         (verified (verify '() plus-minused)))
-    (format #t "The Result of the Evaluation is ~S.~%" (car (calculate-infix verified)))))
+	(-> str
+			(string->list)
+			(parsify)
+			(exp-replace)
+			(minus-minus)
+			(plus-minus)
+			(verify)
+			(calculate-infix)
+			(car)))
 
 (define (frac-add intg frac)
   (if (= frac 0)
@@ -234,5 +278,14 @@
         (list (car result) (cadr consed-args)))))
 
 ;; ./infix.scm "<expression>"
-(calculate-infix-string (cadr (command-line)))
+;; (calculate-infix-string (cadr (command-line)))
+(format #t "The Result of the Evaluation is ~S.~%" (infix-calc (cadr (command-line))))
 
+;; New idea
+;; Instead of calling recursion on each nesting, we use the Nestedness theorem
+;; Nestedness theorem takes the rightmost ( and evaluates it until it hits )
+;; The ( * ) is replaced with the evaluated value
+;; We now go to the next rightmost (, and repeat until we hit )
+;; For additional completeness, ( ) could be added to open expressions too
+;; i.e 2 * (2 + 2) becomes (2 * (2 + 2))
+;; Then when no more parens left, evaluation is complete
