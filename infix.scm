@@ -259,14 +259,23 @@
                          (append carry (list (car lst))))))]))
 
 (define (calculate-infix lst)
-  "Calculates the value of a cleaned infix arithmetic list"
-  (let* ((parensed (eval-parens '() lst))
-         (negated (negativize '() parensed))
-         (consed-args (split-at-> negated))
-         (result (infix-+ (infix-% (infix-* (infix-/ (infix-^ (infix-dot (reverse (car consed-args))))))))))
-    (if (null? (cdr consed-args))
+	"Calculate the value of a cleaned infix arithmetic list"
+	(let* ((args (-> lst
+									 (eval-parens)
+									 (negativize)
+									 (split-at->)))
+				 (result (-> args
+										 (car)
+										 (reverse)
+										 (infix-dot)
+										 (infix-^)
+										 (infix-/)
+										 (infix-*)
+										 (infix-%)
+										 (infix-+))))
+    (if (null? (cdr args))
         result
-        (list (car result) (cadr consed-args)))))
+        (list (car result) (cadr args)))))
 
 ;; ./infix.scm "<expression>"
 ;; (calculate-infix-string (cadr (command-line)))
