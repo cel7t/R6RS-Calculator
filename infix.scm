@@ -18,7 +18,7 @@
 ;; Boston, MA  02110-1301, USA.
 
 ;; Details:
-;; Supports +, -, **, *, %, ( and ).
+;; Supports +, -, **, ^, *, %, ( and ).
 ;; Works with floating-point numbers.
 ;; As Scheme is infinite-precision, be careful if you set the output as Decimal
 ;; Should work with all R6RS Scheme Implementations
@@ -277,9 +277,42 @@
         result
         (list (car result) (cadr args)))))
 
+(define (display-help-string)
+	(display
+	 "R6RS Infix Expression Calculator
+Supports +, -, **, ^, *, %, ( and ).
+Works with floating-point numbers.
+As Scheme is infinite-precision, be careful if you set the output as Decimal
+It should work with all R6RS Scheme Implementations and has been tested with Chez and Guile Scheme
+For Chez, append at the top of the file:
+#!/usr/bin/chez --script
+For Guile, append at the top of the file:
+#!/usr/bin/guile -s
+!#
+For other R6RS compliant scheme implementations,
+check the 'script' function and add it to the top of this file.
+Usage:
+./infix.scm \"<expression>\"
+The <expression> may contain integer and floating point numbers
+and the symbols +, -, *, **, ^, (, ), [, ], {, } and .
+Example:
+./infix.scm \"2*5 + 2^(2+1) -2*2\"
+Output:
+The Result of the Evaluation is 14.
+Passing help or -h to infix.scm prints this message.")
+	(newline))
+
+
+
 ;; ./infix.scm "<expression>"
 ;; (calculate-infix-string (cadr (command-line)))
-(format #t "The Result of the Evaluation is ~S.~%" (infix-calc (cadr (command-line))))
+;; (format #t "The Result of the Evaluation is ~S.~%" (infix-calc (cadr (command-line))))
+
+(let ((command-line-argument (cadr (command-line))))
+	(cond
+	 ((member command-line-argument '("help" "-h")) (display-help-string))
+	 (#t
+		(format #t "The Result of the Evaluation is ~S.~%" (infix-calc command-line-argument)))))
 
 ;; New idea
 ;; Instead of calling recursion on each nesting, we use the Nestedness theorem
